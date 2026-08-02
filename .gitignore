@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ── Virtual environments ─────────────────────
+venv/
+.venv/
+env/
+backend/venv/
+backend/.venv/
+
+# ── Environment / secrets ────────────────────
+.env
+*.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# ── Node ─────────────────────────────────────
+frontend/node_modules/
+node_modules/
+
+# ── Next.js build output ─────────────────────
+frontend/.next/
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+
+# ── Python build / dist ──────────────────────
+backend/app/dist/
+backend/app/build/
+*.egg-info/
+dist/
+build/
+
+# ── Database ─────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── IDE / OS ─────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────
+*.log
+logs/
