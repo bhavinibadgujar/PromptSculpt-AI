@@ -1,0 +1,23 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" rx="36" fill="#09090B"/>
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="#111827" stroke="#2A3142"/>
+  <rect x="86" y="96" width="116" height="116" rx="28" fill="url(#grad)"/>
+  <path d="M126 132H170C190 132 204 144 204 160C204 176 190 188 170 188H126" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M126 188V218" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <path d="M178 132L214 98" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <path d="M214 98L198 122" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="176" cy="160" r="10" fill="white" fill-opacity="0.95"/>
+  <path d="M326 142H500" stroke="#A855F7" stroke-width="10" stroke-linecap="round"/>
+  <path d="M326 186H436" stroke="#8B5CF6" stroke-width="10" stroke-linecap="round"/>
+  <text x="86" y="390" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="70" font-weight="700">PromptSculpt AI</text>
+  <text x="86" y="448" fill="#94A3B8" font-family="Inter, Arial, sans-serif" font-size="34">Premium AI Prompt Intelligence · Prompt X-Ray</text>
+  <rect x="86" y="492" width="212" height="48" rx="24" fill="url(#grad)"/>
+  <text x="118" y="524" fill="white" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600">Analyze Prompt</text>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="58%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+</svg>

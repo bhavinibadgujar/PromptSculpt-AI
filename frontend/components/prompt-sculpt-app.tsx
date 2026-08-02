@@ -2,27 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2, Clock3, Copy, FileText, History, Lightbulb, Menu, RefreshCw, Rocket, Search, Sparkles, Target, Trash2, TriangleAlert, WandSparkles, X, Zap } from 'lucide-react'
-import { analyzePromptApi, deleteHistoryApi, demoAnalysis, examples, fetchHistoryApi, type Analysis, type Category, type HistoryItem } from '@/lib/prompt-analysis'
+import { BrandMark } from '@/components/brand-mark'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { analyzePromptApi, deleteHistoryApi, demoAnalysis, examples, fetchHistoryApi, type Analysis, type Category, type HistoryItem, type XRayHighlight, type XRayIssueType } from '@/lib/prompt-analysis'
 
 const categories = Object.keys(examples) as Category[]
 const demo = demoAnalysis
 
 function Logo() {
   return (
-    <a href="#top" className="flex min-h-11 items-center gap-3" aria-label="PromptSculpt AI home">
-      <span className="logo-gradient flex size-9 shrink-0 items-center justify-center rounded-xl shadow-md shadow-primary/20">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M10 2.5C7.5 4.5 5.5 7 5.5 10c0 2 1 3.8 2.5 4.8L10 18l2-3.2C13.5 13.8 14.5 12 14.5 10c0-3-2-5.5-4.5-7.5z" fill="white" fillOpacity=".92"/>
-          <circle cx="10" cy="10" r="2" fill="white"/>
-          <circle cx="6" cy="7" r="1" fill="white" fillOpacity=".6"/>
-          <circle cx="14" cy="7" r="1" fill="white" fillOpacity=".6"/>
-          <circle cx="10" cy="4" r="1" fill="white" fillOpacity=".5"/>
-        </svg>
-      </span>
-      <span className="flex flex-col leading-none">
-        <span className="text-[0.8125rem] font-bold tracking-tight text-foreground">PromptSculpt <span className="gradient-text">AI</span></span>
-        <span className="mt-0.5 text-[0.625rem] font-medium tracking-wide text-muted-foreground">Prompt Intelligence</span>
-      </span>
+    <a href="#top" className="flex min-h-11 items-center" aria-label="PromptSculpt AI home">
+      <BrandMark size={34} showWordmark />
     </a>
   )
 }
@@ -85,7 +75,7 @@ function AuditReport({ analysis, copyText }: { analysis: Analysis; copyText: (t:
     <div className="result-enter flex flex-col gap-4">
 
       {/* ── Hero Score ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-white" style={{boxShadow:'0 4px 28px rgba(124,58,237,0.12)'}}>
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-card" style={{boxShadow:'0 4px 28px rgba(124,58,237,0.12)'}}>
         <div className="absolute inset-x-0 top-0 h-[3px]" style={{background:'linear-gradient(90deg,#7C3AED,#8B5CF6,#2563EB)'}} />
         <div className="pointer-events-none absolute -right-12 -top-12 size-56 rounded-full" style={{background:'radial-gradient(circle,rgba(124,58,237,0.09) 0%,transparent 65%)'}} />
         <div className="pointer-events-none absolute -left-8 bottom-0 size-40 rounded-full" style={{background:'radial-gradient(circle,rgba(37,99,235,0.06) 0%,transparent 65%)'}} />
@@ -119,14 +109,14 @@ function AuditReport({ analysis, copyText }: { analysis: Analysis; copyText: (t:
 
       {/* ── Strengths ── */}
       {strengths.length > 0 && (
-        <div className="report-card stagger-1 border-emerald-200 bg-emerald-50/40">
+        <div className="report-card stagger-1 border-emerald-200/70 bg-emerald-500/10">
           <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-100"><CheckCircle2 className="size-3.5 text-emerald-600" /></span>
-            <span className="text-sm font-bold text-emerald-800">Strengths</span>
-            <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">{strengths.length} passing</span>
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15"><CheckCircle2 className="size-3.5 text-emerald-600" /></span>
+            <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Strengths</span>
+            <span className="ml-auto rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">{strengths.length} passing</span>
           </div>
           <div className="grid gap-1.5 sm:grid-cols-2">{strengths.map(d => (
-            <div key={d.label} className="report-item border-emerald-100">
+            <div key={d.label} className="report-item border-emerald-200/70 bg-emerald-500/5">
               <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
               <div><p className="text-xs font-semibold text-foreground">{d.label}<span className="ml-1.5 font-bold text-emerald-600">{d.score}</span></p><p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{d.note}</p></div>
             </div>
@@ -136,21 +126,21 @@ function AuditReport({ analysis, copyText }: { analysis: Analysis; copyText: (t:
 
       {/* ── Missing Elements ── */}
       {(missing.length > 0 || weaknesses.length > 0) && (
-        <div className="report-card stagger-2 border-amber-200 bg-amber-50/40">
+        <div className="report-card stagger-2 border-amber-200/70 bg-amber-500/10">
           <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-100"><TriangleAlert className="size-3.5 text-amber-600" /></span>
-            <span className="text-sm font-bold text-amber-800">Missing Elements</span>
-            <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">{missing.length + weaknesses.length} issues</span>
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-500/15"><TriangleAlert className="size-3.5 text-amber-600" /></span>
+            <span className="text-sm font-bold text-amber-700 dark:text-amber-400">Missing Elements</span>
+            <span className="ml-auto rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">{missing.length + weaknesses.length} issues</span>
           </div>
           <div className="flex flex-col gap-1.5">
             {missing.map(d => (
-              <div key={d.label} className="report-item border-amber-100">
+              <div key={d.label} className="report-item border-amber-200/70 bg-amber-500/5">
                 <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
                 <div><p className="text-xs font-semibold text-foreground">{d.label}<span className="ml-1.5 font-bold text-amber-600">{d.score}</span></p><p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{d.note}</p></div>
               </div>
             ))}
             {weaknesses.map(issue => (
-              <div key={issue} className="report-item border-amber-100">
+              <div key={issue} className="report-item border-amber-200/70 bg-amber-500/5">
                 <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-400" />
                 <p className="text-[11px] leading-5 text-muted-foreground">{issue}</p>
               </div>
@@ -161,11 +151,11 @@ function AuditReport({ analysis, copyText }: { analysis: Analysis; copyText: (t:
 
       {/* ── AI Improvements ── */}
       {improvements.length > 0 && (
-        <div className="report-card stagger-3 border-violet-200 bg-violet-50/40">
+        <div className="report-card stagger-3 border-violet-200/70 bg-violet-500/10">
           <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-100"><Rocket className="size-3.5 text-violet-600" /></span>
-            <span className="text-sm font-bold text-violet-800">What the AI Added</span>
-            <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">{improvements.length} enhancements</span>
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-500/15"><Rocket className="size-3.5 text-violet-600" /></span>
+            <span className="text-sm font-bold text-violet-700 dark:text-violet-400">What the AI Added</span>
+            <span className="ml-auto rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-400">{improvements.length} enhancements</span>
           </div>
           <div className="flex flex-col gap-1.5">{improvements.map(imp => (
             <div key={imp} className="report-item border-violet-100">
@@ -183,19 +173,193 @@ function AuditReport({ analysis, copyText }: { analysis: Analysis; copyText: (t:
             <WandSparkles className="size-3.5 text-primary" />
             <span className="text-xs font-bold text-primary">AI Optimized Prompt</span>
           </div>
-          <button onClick={() => copyText(analysis.improved)} className="inline-flex items-center gap-1.5 rounded-lg border border-primary/20 bg-white px-3 py-1.5 text-xs font-semibold text-primary shadow-sm transition-all hover:bg-primary hover:text-white">
+          <button onClick={() => copyText(analysis.improved)} className="inline-flex items-center gap-1.5 rounded-lg border border-primary/20 bg-card px-3 py-1.5 text-xs font-semibold text-primary shadow-sm transition-all hover:bg-primary hover:text-white">
             <Copy className="size-3.5" />Copy Prompt
           </button>
         </div>
-        <div className="max-h-72 overflow-auto whitespace-pre-wrap bg-white p-5 font-mono text-[0.8125rem] leading-[1.8] text-foreground">{analysis.improved}</div>
+        <div className="max-h-72 overflow-auto whitespace-pre-wrap bg-card p-5 font-mono text-[0.8125rem] leading-[1.8] text-foreground">{analysis.improved}</div>
       </div>
 
     </div>
   )
 }
 
-function Diagnostic({ analysis, activeTab, setActiveTab, prompt, copyText }: { analysis: Analysis; activeTab: 'overview'|'improved'|'report'; setActiveTab: (tab: 'overview'|'improved'|'report') => void; prompt: string; copyText: (text: string) => void }) {
-  const tabs = ['overview', 'improved', 'report'] as const
+function XRayPanel({ analysis, prompt, copyText }: { analysis: Analysis; prompt: string; copyText: (text: string) => void }) {
+  const [activeHighlight, setActiveHighlight] = useState<XRayHighlight | null>(analysis.xray?.highlights[0] ?? null)
+
+  useEffect(() => {
+    setActiveHighlight(analysis.xray?.highlights[0] ?? null)
+  }, [analysis.xray])
+
+  const issueStyles: Record<XRayIssueType, { badge: string; chip: string; label: string }> = {
+    ambiguous: { badge: 'border-rose-200 bg-rose-50 text-rose-700', chip: 'bg-rose-500', label: 'Ambiguous wording' },
+    missing_context: { badge: 'border-amber-200 bg-amber-50 text-amber-700', chip: 'bg-amber-500', label: 'Missing context' },
+    weak_constraints: { badge: 'border-sky-200 bg-sky-50 text-sky-700', chip: 'bg-sky-500', label: 'Weak constraints' },
+    strong_section: { badge: 'border-emerald-200 bg-emerald-50 text-emerald-700', chip: 'bg-emerald-500', label: 'Strong section' },
+  }
+
+  const severityStyles: Record<string, string> = {
+    critical: 'border-red-200 bg-red-50 text-red-700',
+    high: 'border-rose-200 bg-rose-50 text-rose-700',
+    medium: 'border-amber-200 bg-amber-50 text-amber-700',
+    low: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  }
+
+  if (!analysis.xray) {
+    return <div className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground shadow-sm">Prompt X-Ray data is not available for this analysis yet.</div>
+  }
+
+  const highlights = analysis.xray.highlights
+  const summary = analysis.xray.summary
+  const confidence = analysis.xray.confidence
+
+  const renderPromptWithHighlights = () => {
+    if (!highlights.length) {
+      return <p className="whitespace-pre-wrap text-sm leading-7 text-muted-foreground">{prompt}</p>
+    }
+
+    const sorted = [...highlights].sort((a, b) => a.start - b.start)
+    const parts: Array<{ text: string; highlight?: XRayHighlight }> = []
+    let cursor = 0
+
+    sorted.forEach((highlight) => {
+      const start = Math.max(0, Math.min(highlight.start, prompt.length))
+      const end = Math.max(start, Math.min(highlight.end, prompt.length))
+      if (start > cursor) parts.push({ text: prompt.slice(cursor, start) })
+      if (start < end) parts.push({ text: prompt.slice(start, end), highlight })
+      cursor = end
+    })
+
+    if (cursor < prompt.length) parts.push({ text: prompt.slice(cursor) })
+
+    return <div className="whitespace-pre-wrap text-sm leading-7 text-foreground">
+      {parts.map((piece, index) => piece.highlight ? (
+        <button key={`${piece.highlight.start}-${piece.highlight.end}-${index}`} type="button" onClick={() => setActiveHighlight(piece.highlight!)} className={`rounded-md px-1.5 py-0.5 text-left font-medium transition-colors ${issueStyles[piece.highlight!.issueType].badge}`}>
+          {piece.text}
+        </button>
+      ) : <span key={`plain-${index}`}>{piece.text}</span>)}
+    </div>
+  }
+
+  return <div className="flex flex-col gap-5">
+    <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-violet-500/10 to-sky-500/10 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="eyebrow">🔍 AI Prompt X-Ray</p>
+          <h3 className="mt-2 text-2xl font-extrabold tracking-tight text-foreground">A diagnostic view of your prompt’s clarity, constraints, and intent.</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">This view highlights where your prompt is strong, where it is ambiguous, and exactly how to turn it into a more reliable instruction for AI.</p>
+        </div>
+        <div className="rounded-2xl border border-violet-200/70 bg-card/90 px-4 py-3 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">AI Confidence</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="grid size-14 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-sky-500 text-lg font-black text-white">{confidence.score}</div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{confidence.score >= 85 ? 'Highly actionable' : confidence.score >= 70 ? 'Strong diagnostic signal' : 'Needs more detail'}</p>
+              <p className="text-xs text-muted-foreground">{confidence.reasons[0]}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Original prompt</p>
+            <p className="text-xs text-muted-foreground">Click any highlighted span to inspect the issue.</p>
+          </div>
+          <span className="rounded-full border border-violet-200/70 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-400">Live inspector</span>
+        </div>
+        <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
+          {renderPromptWithHighlights()}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Inspector</p>
+            <p className="text-xs text-muted-foreground">Why the issue matters and how to improve it.</p>
+          </div>
+          {activeHighlight ? <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${issueStyles[activeHighlight.issueType].badge}`}>{issueStyles[activeHighlight.issueType].label}</span> : null}
+        </div>
+        {activeHighlight ? <div className="mt-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${severityStyles[activeHighlight.severity]}`}>{activeHighlight.severity.toUpperCase()}</span>
+            <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] font-semibold text-foreground">{activeHighlight.title ?? 'Highlighted issue'}</span>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Issue</p>
+            <p className="mt-1 text-sm leading-6 text-foreground">{activeHighlight.explanation}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Impact on AI output</p>
+            <p className="mt-1 text-sm leading-6 text-foreground">{activeHighlight.impact}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Better version</p>
+            <p className="mt-1 text-sm leading-6 text-foreground">{activeHighlight.suggestedReplacement}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200/70 bg-emerald-500/10 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700">Expected improvement</p>
+            <p className="mt-1 text-sm leading-6 text-emerald-800">{activeHighlight.expectedImprovement}</p>
+          </div>
+        </div> : <div className="mt-4 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">Select a highlighted section to see the reasoning and replacement guidance.</div>}
+      </div>
+    </div>
+
+    <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p className="text-sm font-semibold text-foreground">Executive summary</p>
+        <div className="mt-4 grid gap-3">
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Overall grade</p>
+            <p className="mt-1 text-lg font-semibold text-foreground">{summary.overallGrade}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Prompt maturity</p>
+            <p className="mt-1 text-sm leading-6 text-foreground">{summary.promptMaturity}</p>
+          </div>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p className="text-sm font-semibold text-foreground">Live prompt diff</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Original</p>
+            <p className="mt-2 text-sm leading-6 text-foreground">{prompt.slice(0, 120)}{prompt.length > 120 ? '…' : ''}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Highlighted issues</p>
+            <ul className="mt-2 space-y-2 text-sm text-foreground">
+              {highlights.slice(0, 3).map((item) => <li key={`${item.issueType}-${item.start}`} className="flex items-start gap-2"><span className={`mt-1.5 size-2 shrink-0 rounded-full ${issueStyles[item.issueType].chip}`} />{item.title ?? item.issueType}</li>)}
+            </ul>
+          </div>
+          <div className="rounded-xl border border-emerald-200/70 bg-emerald-500/10 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700">Improved prompt</p>
+            <p className="mt-2 text-sm leading-6 text-emerald-800">{analysis.improved.slice(0, 140)}{analysis.improved.length > 140 ? '…' : ''}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="flex flex-wrap gap-2">
+        {summary.topThreeRisks.map((risk) => <span key={risk} className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">{risk}</span>)}
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-border bg-muted/50 p-3"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Biggest opportunity</p><p className="mt-1 text-sm leading-6 text-foreground">{summary.biggestImprovementOpportunity}</p></div>
+        <div className="rounded-xl border border-border bg-muted/50 p-3"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Expected output gain</p><p className="mt-1 text-sm leading-6 text-foreground">{summary.expectedAiOutputGain}</p></div>
+        <div className="rounded-xl border border-border bg-muted/50 p-3"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Quality increase</p><p className="mt-1 text-sm leading-6 text-foreground">{summary.estimatedQualityIncrease}</p></div>
+        <div className="rounded-xl border border-border bg-muted/50 p-3"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Token efficiency</p><p className="mt-1 text-sm leading-6 text-foreground">{summary.estimatedTokenEfficiency}</p></div>
+      </div>
+    </div>
+  </div>
+}
+
+function Diagnostic({ analysis, activeTab, setActiveTab, prompt, copyText }: { analysis: Analysis; activeTab: 'overview'|'xray'|'improved'|'report'; setActiveTab: (tab: 'overview'|'xray'|'improved'|'report') => void; prompt: string; copyText: (text: string) => void }) {
+  const tabs = ['overview', 'xray', 'improved', 'report'] as const
   return <div className="result-enter flex flex-col gap-5">
     <div className="flex items-center justify-between gap-4 border-b border-border pb-5">
       <div>
@@ -207,7 +371,7 @@ function Diagnostic({ analysis, activeTab, setActiveTab, prompt, copyText }: { a
       </div>
       <Score value={analysis.score} small />
     </div>
-    <div className="flex gap-1 border-b border-border" role="tablist" aria-label="Analysis views">{tabs.map(tab => <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={activeTab === tab} aria-controls={`panel-${tab}`} onClick={() => setActiveTab(tab)} className={`min-h-11 border-b-2 px-4 text-sm font-medium transition-colors ${activeTab === tab ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{tab === 'improved' ? 'AI Optimized' : tab === 'overview' ? 'Overview' : 'AI Report'}</button>)}</div>
+    <div className="flex gap-1 border-b border-border" role="tablist" aria-label="Analysis views">{tabs.map(tab => <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={activeTab === tab} aria-controls={`panel-${tab}`} onClick={() => setActiveTab(tab)} className={`min-h-11 border-b-2 px-4 text-sm font-medium transition-colors ${activeTab === tab ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{tab === 'improved' ? 'AI Optimized' : tab === 'overview' ? 'Overview' : tab === 'xray' ? '🔍 X-Ray' : 'AI Report'}</button>)}</div>
     <div id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`} className="tab-enter">
       {activeTab === 'overview' && <div className="flex flex-col gap-5">
         <div className="grid gap-3 sm:grid-cols-2">{analysis.dimensions.map(item => {
@@ -237,13 +401,14 @@ function Diagnostic({ analysis, activeTab, setActiveTab, prompt, copyText }: { a
           <ul className="mt-3 flex flex-col gap-2">{analysis.issues.slice(0,3).map(issue => <li key={issue} className="suggestion-card"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100"><Sparkles className="size-3 text-amber-600" /></span><span className="text-xs leading-5 text-muted-foreground">{issue}</span></li>)}</ul>
         </div>
       </div>}
+      {activeTab === 'xray' && <XRayPanel analysis={analysis} prompt={prompt} copyText={copyText} />}
       {activeTab === 'improved' && <div className="flex flex-col gap-3">
         <div className="overflow-hidden rounded-xl border border-primary/20" style={{boxShadow:'0 4px 20px rgba(124,58,237,0.08)'}}>
           <div className="flex items-center justify-between border-b border-primary/15 bg-gradient-to-r from-primary/6 to-secondary/4 px-4 py-2.5">
             <div className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary/60" /><span className="text-xs font-semibold text-primary">AI Optimized Prompt</span></div>
             <button onClick={() => copyText(analysis.improved)} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-primary transition-all hover:bg-primary/10"><Copy className="size-3.5" />Copy</button>
           </div>
-          <div className="max-h-80 overflow-auto whitespace-pre-wrap bg-white p-5 font-mono text-sm leading-7 text-foreground">{analysis.improved}</div>
+          <div className="max-h-80 overflow-auto whitespace-pre-wrap bg-card p-5 font-mono text-sm leading-7 text-foreground">{analysis.improved}</div>
         </div>
       </div>}
       {activeTab === 'report' && <AuditReport analysis={analysis} copyText={copyText} />}
@@ -256,7 +421,7 @@ export function PromptSculptApp() {
   const [category, setCategory] = useState<Category>('Marketing')
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview'|'improved'|'report'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview'|'xray'|'improved'|'report'>('overview')
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'All'|Category>('All')
@@ -301,7 +466,7 @@ export function PromptSculptApp() {
     try {
       const result = await analyzePromptApi(promptToAnalyze)
       setAnalysis(result)
-      setActiveTab('overview')
+      setActiveTab('xray')
       await loadHistory()
     } catch (error) {
       // Keep analysis=null — never silently show demo data on failure
@@ -336,31 +501,35 @@ export function PromptSculptApp() {
         </div>
         <div className="hidden items-center gap-3 md:flex">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700"><span className="size-1.5 rounded-full bg-green-500" />AI Ready</span>
+          <ThemeToggle />
           <a href="#analyzer" className="button-primary">Analyze Prompt <ArrowRight className="size-4" /></a>
         </div>
         <button className="grid size-11 place-items-center rounded-xl border border-border md:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="Toggle navigation">
           {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </nav>
-      {menuOpen && <div className="menu-enter flex flex-col border-t border-border bg-white/95 backdrop-blur-xl p-5 text-sm">
+      {menuOpen && <div className="menu-enter flex flex-col border-t border-border bg-card/95 backdrop-blur-xl p-5 text-sm">
         <a className="min-h-11 py-3 font-medium text-foreground" href="#product" onClick={() => setMenuOpen(false)}>Home</a>
         <a className="min-h-11 py-3 font-medium text-foreground" href="#analyzer" onClick={() => setMenuOpen(false)}>Analyze</a>
         <a className="min-h-11 py-3 font-medium text-foreground" href="#history" onClick={() => setMenuOpen(false)}>History</a>
         <a className="min-h-11 py-3 font-medium text-foreground" href="#method" onClick={() => setMenuOpen(false)}>About</a>
-        <a href="#analyzer" className="button-primary mt-3 w-full justify-center">Analyze Prompt <ArrowRight className="size-4" /></a>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <ThemeToggle />
+          <a href="#analyzer" className="button-primary flex-1 justify-center">Analyze Prompt <ArrowRight className="size-4" /></a>
+        </div>
       </div>}
     </header>
 
     <section id="product" className="hero-bg relative px-5 pb-20 pt-32 lg:px-8 lg:pb-24 lg:pt-40">
       <div className="mx-auto max-w-7xl">
         <div className="hero-enter flex flex-col items-center text-center">
-          <div className="badge-pill mb-7"><span className="status-dot" />AI-Powered · Instant Analysis · Private</div>
+          <div className="badge-pill mb-7"><span className="status-dot" />AI Prompt Intelligence · Prompt X-Ray · Enterprise Ready</div>
           <h1 className="mx-auto max-w-4xl text-balance text-5xl font-extrabold leading-[1.04] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-[4.5rem]">
-            Craft Better Prompts.<br />
-            <span className="gradient-text">Unlock Better AI.</span>
+            Precision Prompting.<br />
+            <span className="gradient-text">Professional AI Outcomes.</span>
           </h1>
           <p className="hero-enter-delay mx-auto mt-7 max-w-xl text-pretty text-lg leading-8 text-muted-foreground">
-            Analyze, score, optimize, and refine your prompts with AI-powered prompt engineering.
+            Turn vague prompts into precise instructions with live diagnostics, executive insight, and a premium AI prompt workspace.
           </p>
           <div className="hero-enter-delay2 mt-10 flex flex-col items-center gap-3 sm:flex-row">
             <a href="#analyzer" className="button-primary px-8 py-3 text-[0.9375rem]">Analyze Prompt <ArrowRight className="size-4" /></a>
@@ -424,8 +593,8 @@ export function PromptSculptApp() {
                     </div>
                   </div>
                   <div>
-                    <p className="eyebrow">AI Intelligence at work</p>
-                    <h2 className="mt-1.5 text-lg font-bold tracking-tight">Analyzing your prompt</h2>
+                    <p className="eyebrow">Brand-powered intelligence</p>
+                    <h2 className="mt-1.5 text-lg font-bold tracking-tight">Scanning your prompt with precision</h2>
                     <p className="mt-1 min-h-5 text-sm font-medium text-primary transition-all duration-500">{loadMessages[loadStep]}</p>
                   </div>
                   <div className="w-full max-w-[240px]">
@@ -440,7 +609,7 @@ export function PromptSculptApp() {
                     {l:'Clarity & Intent',   done: loadStep > 1},
                     {l:'Context & Audience', done: loadStep > 3},
                     {l:'Output Format',      done: loadStep > 5},
-                  ].map(({l,done}) => <div key={l} className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-[11px] transition-colors" style={{color: done ? '#10B981' : '#6B7280'}}>
+                  ].map(({l,done}) => <div key={l} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[11px] transition-colors" style={{color: done ? '#10B981' : '#6B7280'}}>
                     {done ? <CheckCircle2 className="size-3.5 shrink-0" /> : <span className="size-1.5 rounded-full bg-primary" />}{l}
                   </div>)}</div>
                 </div>
@@ -451,14 +620,14 @@ export function PromptSculptApp() {
                       <Sparkles className="size-6 text-primary/50" />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold tracking-tight text-foreground">Ready to analyze</h2>
-                      <p className="mt-1.5 max-w-xs text-sm text-muted-foreground">Enter your prompt on the left and click <strong>Analyze Prompt</strong> to get your AI intelligence report.</p>
+                      <h2 className="text-base font-bold tracking-tight text-foreground">Ready for a premium prompt audit</h2>
+                      <p className="mt-1.5 max-w-xs text-sm text-muted-foreground">Enter your prompt and click <strong>Analyze Prompt</strong> to launch the Prompt X-Ray experience.</p>
                     </div>
                     <div className="grid w-full max-w-xs gap-1.5">{[
                       {label: 'Clarity & Intent',    desc: 'How clear is your ask?'},
                       {label: 'Context & Audience',  desc: 'Does the AI know the situation?'},
                       {label: 'Constraints & Format', desc: 'Are success criteria defined?'},
-                    ].map(({label,desc}) => <div key={label} className="flex items-center gap-2.5 rounded-lg border border-border bg-white px-3 py-2.5 text-left">
+                    ].map(({label,desc}) => <div key={label} className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5 text-left">
                       <span className="size-1.5 shrink-0 rounded-full bg-primary/40" />
                       <div><p className="text-xs font-semibold text-foreground">{label}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
                     </div>)}
@@ -496,7 +665,7 @@ export function PromptSculptApp() {
     </div></section>
 
     <section className="px-5 pb-24 lg:px-8"><div className="mx-auto max-w-7xl overflow-hidden rounded-3xl p-px" style={{background:'linear-gradient(135deg,#7c3aed,#2563eb)'}}><div className="flex flex-col items-start justify-between gap-7 rounded-3xl bg-card p-8 sm:flex-row sm:items-center sm:p-12"><div><p className="eyebrow mb-3">Ready when you are</p><h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Make your next prompt count.</h2><p className="mt-2 text-muted-foreground">Join developers and creators who write better AI prompts every day.</p></div><a href="#analyzer" className="button-primary whitespace-nowrap px-8 py-3 text-base">Analyze a Prompt <ArrowRight className="size-5" /></a></div></div></section>
-    <footer className="border-t border-border bg-white px-5 py-10 lg:px-8">
+    <footer className="border-t border-border bg-card/70 px-5 py-10 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <Logo />
@@ -508,6 +677,6 @@ export function PromptSculptApp() {
         </div>
       </div>
     </footer>
-    {notice && <div role="status" aria-live="polite" className="toast-enter fixed bottom-6 left-1/2 z-50 flex min-h-11 -translate-x-1/2 items-center gap-2.5 rounded-xl border border-green-200 bg-white px-5 py-3 text-sm font-semibold text-foreground" style={{boxShadow:'0 8px 32px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.06)'}}><span className="flex size-5 items-center justify-center rounded-full bg-green-100"><Check className="size-3.5 text-green-600" /></span>{notice}</div>}
+    {notice && <div role="status" aria-live="polite" className="toast-enter fixed bottom-6 left-1/2 z-50 flex min-h-11 -translate-x-1/2 items-center gap-2.5 rounded-xl border border-green-200 bg-card px-5 py-3 text-sm font-semibold text-foreground" style={{boxShadow:'0 8px 32px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.06)'}}><span className="flex size-5 items-center justify-center rounded-full bg-green-100"><Check className="size-3.5 text-green-600" /></span>{notice}</div>}
   </main>
 }
