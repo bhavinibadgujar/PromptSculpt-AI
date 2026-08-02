@@ -7,6 +7,42 @@ export type Dimension = {
   note: string
 }
 
+export type XRayIssueType = 'ambiguous' | 'missing_context' | 'weak_constraints' | 'strong_section'
+export type XRaySeverity = 'critical' | 'high' | 'medium' | 'low'
+
+export type XRayHighlight = {
+  start: number
+  end: number
+  issueType: XRayIssueType
+  severity: XRaySeverity
+  explanation: string
+  suggestedReplacement: string
+  impact: string
+  expectedImprovement: string
+  title?: string
+}
+
+export type XRayConfidence = {
+  score: number
+  reasons: string[]
+}
+
+export type XRaySummary = {
+  overallGrade: string
+  promptMaturity: string
+  topThreeRisks: string[]
+  biggestImprovementOpportunity: string
+  expectedAiOutputGain: string
+  estimatedQualityIncrease: string
+  estimatedTokenEfficiency: string
+}
+
+export type XRayAnalysis = {
+  summary: XRaySummary
+  confidence: XRayConfidence
+  highlights: XRayHighlight[]
+}
+
 export type Analysis = {
   score: number
   grade: string
@@ -15,6 +51,7 @@ export type Analysis = {
   suggestions: string[]
   issues: string[]  // combined weaknesses + suggestions for backwards compat
   improved: string
+  xray?: XRayAnalysis | null
 }
 
 type ApiAnalysisResponse = {
@@ -23,6 +60,32 @@ type ApiAnalysisResponse = {
   weaknesses: string[]
   suggestions: string[]
   improved_prompt: string
+  xray?: {
+    summary: {
+      overall_grade: string
+      prompt_maturity: string
+      top_three_risks: string[]
+      biggest_improvement_opportunity: string
+      expected_ai_output_gain: string
+      estimated_quality_increase: string
+      estimated_token_efficiency: string
+    }
+    confidence: {
+      score: number
+      reasons: string[]
+    }
+    highlights: Array<{
+      start: number
+      end: number
+      issue_type: XRayIssueType
+      severity: XRaySeverity
+      explanation: string
+      suggested_replacement: string
+      impact: string
+      expected_improvement: string
+      title?: string
+    }>
+  } | null
 }
 
 export type HistoryItem = {
@@ -124,6 +187,32 @@ export async function analyzePromptApi(prompt: string): Promise<Analysis> {
     suggestions: data.suggestions,
     issues: [...data.weaknesses, ...data.suggestions],
     improved: data.improved_prompt,
+    xray: data.xray ? {
+      summary: {
+        overallGrade: data.xray.summary.overall_grade,
+        promptMaturity: data.xray.summary.prompt_maturity,
+        topThreeRisks: data.xray.summary.top_three_risks,
+        biggestImprovementOpportunity: data.xray.summary.biggest_improvement_opportunity,
+        expectedAiOutputGain: data.xray.summary.expected_ai_output_gain,
+        estimatedQualityIncrease: data.xray.summary.estimated_quality_increase,
+        estimatedTokenEfficiency: data.xray.summary.estimated_token_efficiency,
+      },
+      confidence: {
+        score: data.xray.confidence.score,
+        reasons: data.xray.confidence.reasons,
+      },
+      highlights: data.xray.highlights.map(highlight => ({
+        start: highlight.start,
+        end: highlight.end,
+        issueType: highlight.issue_type,
+        severity: highlight.severity,
+        explanation: highlight.explanation,
+        suggestedReplacement: highlight.suggested_replacement,
+        impact: highlight.impact,
+        expectedImprovement: highlight.expected_improvement,
+        title: highlight.title,
+      })),
+    } : null,
   }
 }
 

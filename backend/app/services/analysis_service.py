@@ -66,9 +66,11 @@ class AnalysisService:
             "specificity, context, constraints, and output_format. Score each criterion "
             "as an integer from 0 to 20. The overall_score must equal the sum of those "
             "five scores and must be out of 100. Identify concrete weaknesses, suggest "
-            "practical improvements, and generate a stronger improved_prompt. Return only "
-            "valid JSON that matches the provided schema. Do not include markdown, prose, "
-            "or any keys outside the schema."
+            "practical improvements, and generate a stronger improved_prompt. "
+            "Also produce a structured xray object with an executive summary, confidence "
+            "score, and highlighted spans that point to ambiguous wording, missing context, "
+            "weak constraints, or strong sections. Return only valid JSON that matches the "
+            "provided schema. Do not include markdown, prose, or any keys outside the schema."
         )
 
     @staticmethod
@@ -82,6 +84,7 @@ class AnalysisService:
                 "weaknesses",
                 "suggestions",
                 "improved_prompt",
+                "xray",
             ],
             "properties": {
                 "overall_score": {"type": "integer", "minimum": 0, "maximum": 100},
@@ -112,6 +115,63 @@ class AnalysisService:
                     "items": {"type": "string"},
                 },
                 "improved_prompt": {"type": "string"},
+                "xray": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["summary", "confidence", "highlights"],
+                    "properties": {
+                        "summary": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": [
+                                "overall_grade",
+                                "prompt_maturity",
+                                "top_three_risks",
+                                "biggest_improvement_opportunity",
+                                "expected_ai_output_gain",
+                                "estimated_quality_increase",
+                                "estimated_token_efficiency",
+                            ],
+                            "properties": {
+                                "overall_grade": {"type": "string"},
+                                "prompt_maturity": {"type": "string"},
+                                "top_three_risks": {"type": "array", "items": {"type": "string"}},
+                                "biggest_improvement_opportunity": {"type": "string"},
+                                "expected_ai_output_gain": {"type": "string"},
+                                "estimated_quality_increase": {"type": "string"},
+                                "estimated_token_efficiency": {"type": "string"},
+                            },
+                        },
+                        "confidence": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["score", "reasons"],
+                            "properties": {
+                                "score": {"type": "integer", "minimum": 0, "maximum": 100},
+                                "reasons": {"type": "array", "items": {"type": "string"}},
+                            },
+                        },
+                        "highlights": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "required": ["start", "end", "issue_type", "severity", "explanation", "suggested_replacement", "impact", "expected_improvement"],
+                                "properties": {
+                                    "start": {"type": "integer", "minimum": 0},
+                                    "end": {"type": "integer", "minimum": 0},
+                                    "issue_type": {"type": "string", "enum": ["ambiguous", "missing_context", "weak_constraints", "strong_section"]},
+                                    "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                                    "explanation": {"type": "string"},
+                                    "suggested_replacement": {"type": "string"},
+                                    "impact": {"type": "string"},
+                                    "expected_improvement": {"type": "string"},
+                                    "title": {"type": "string"},
+                                },
+                            },
+                        },
+                    },
+                },
             },
         }
 
@@ -125,18 +185,12 @@ class AnalysisService:
 
     @staticmethod
     def _fallback_response(prompt: str, reason: str) -> AnalyzeResponse:
-        """Generate a realistic demo analysis when the OpenAI API cannot be used.
+        """Generate a realistic demo analysis when the OpenAI API cannot be used."""
+        import hashlib
+        import random
 
-        The demo uses a deterministic pseudo‑random generator seeded from the prompt
-        text so that the same prompt yields the same demo output. This makes the
-        experience repeatable for users while still providing varied results for
-        different prompts.
-        """
-        import random, hashlib
-        # Seed the RNG with a hash of the prompt for reproducibility.
         seed = int(hashlib.sha256(prompt.encode()).hexdigest(), 16)
         rng = random.Random(seed)
-        # Generate scores for each criterion (5‑18) to keep them realistic.
         scores = {
             "clarity": rng.randint(5, 18),
             "specificity": rng.randint(5, 18),
@@ -145,7 +199,6 @@ class AnalysisService:
             "output_format": rng.randint(5, 18),
         }
         overall_score = sum(scores.values())
-        # Identify weaker categories (score < 12) to craft weaknesses and suggestions.
         weak_categories = [cat for cat, sc in scores.items() if sc < 12]
         weaknesses = []
         suggestions = []
@@ -165,11 +218,10 @@ class AnalysisService:
             elif cat == "output_format":
                 weaknesses.append("Does not define the desired output structure.")
                 suggestions.append("State the expected format (e.g., list, paragraph, JSON).")
-        # If no particular weakness was detected, add generic feedback.
         if not weaknesses:
             weaknesses.append("The prompt could be refined for better results.")
             suggestions.append("Consider adding more detail and clear constraints.")
-        # Build an improved prompt by appending brief augmentation based on missing elements.
+
         improvement_parts = []
         if "clarity" in weak_categories:
             improvement_parts.append("Make the objective explicit.")
@@ -181,9 +233,62 @@ class AnalysisService:
             improvement_parts.append("State constraints like tone, length, or style.")
         if "output_format" in weak_categories:
             improvement_parts.append("Define the desired output format.")
+
         improved_prompt = prompt.strip()
         if improvement_parts:
             improved_prompt += "\n\nImproved prompt suggestions: " + " ".join(improvement_parts)
+
+        prompt_lower = prompt.lower()
+        highlights = []
+        if any(word in prompt_lower for word in ["interesting", "nice", "good", "better", "professional"]):
+            highlights.append({
+                "start": 0,
+                "end": min(len(prompt), 24),
+                "issue_type": "ambiguous",
+                "severity": "high",
+                "explanation": "Subjective adjectives make the task open to interpretation.",
+                "suggested_replacement": "Replace vague words with a concrete brief and measurable outcome.",
+                "impact": "The model will produce varied outputs because the goal is underspecified.",
+                "expected_improvement": "Higher consistency and stronger relevance.",
+                "title": "Ambiguous wording",
+            })
+        if "audience" not in prompt_lower and "for" in prompt_lower:
+            highlights.append({
+                "start": 0,
+                "end": min(len(prompt), 24),
+                "issue_type": "missing_context",
+                "severity": "medium",
+                "explanation": "The prompt leaves the intended audience unspecified.",
+                "suggested_replacement": "Add the target audience and their context.",
+                "impact": "Responses may miss the right tone and level of detail.",
+                "expected_improvement": "Better alignment with the intended reader.",
+                "title": "Missing audience context",
+            })
+        if "tone" not in prompt_lower and "format" not in prompt_lower and "word" not in prompt_lower:
+            highlights.append({
+                "start": 0,
+                "end": min(len(prompt), 24),
+                "issue_type": "weak_constraints",
+                "severity": "medium",
+                "explanation": "The prompt lacks measurable boundaries such as length, tone, and format.",
+                "suggested_replacement": "Add constraints like length, tone, and required structure.",
+                "impact": "The model will default to generic, less useful output.",
+                "expected_improvement": "More precise and actionable results.",
+                "title": "Missing constraints",
+            })
+        if len(prompt.split()) > 8:
+            highlights.append({
+                "start": max(0, min(len(prompt), 24)),
+                "end": min(len(prompt), len(prompt)),
+                "issue_type": "strong_section",
+                "severity": "low",
+                "explanation": "The prompt already contains enough content to be expanded into a more detailed instruction.",
+                "suggested_replacement": "Turn the existing intent into a structured task with success criteria.",
+                "impact": "A more explicit structure improves the usefulness of the output.",
+                "expected_improvement": "Higher clarity and better execution.",
+                "title": "Opportunity to strengthen",
+            })
+
         return AnalyzeResponse(
             overall_score=overall_score,
             scores=PromptScores(
@@ -196,4 +301,24 @@ class AnalysisService:
             weaknesses=weaknesses,
             suggestions=suggestions,
             improved_prompt=improved_prompt,
+            xray={
+                "summary": {
+                    "overall_grade": "Developing",
+                    "prompt_maturity": "Needs sharper constraints",
+                    "top_three_risks": weaknesses[:3],
+                    "biggest_improvement_opportunity": "Transform vague phrasing into concrete instructions.",
+                    "expected_ai_output_gain": "Higher relevance and fewer generic responses.",
+                    "estimated_quality_increase": "+18% output quality",
+                    "estimated_token_efficiency": "+12% fewer wasted tokens",
+                },
+                "confidence": {
+                    "score": min(98, 70 + len(highlights) * 6),
+                    "reasons": [
+                        "The intent is understandable.",
+                        "The prompt has enough content to guide revision.",
+                        "A few constraints are still missing.",
+                    ],
+                },
+                "highlights": highlights,
+            },
         )

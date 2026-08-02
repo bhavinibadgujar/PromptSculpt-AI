@@ -1,0 +1,13 @@
+{
+  "name": "PromptSculpt AI",
+  "short_name": "PromptSculpt",
+  "description": "AI Prompt Intelligence for better prompt engineering.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090B",
+  "theme_color": "#7C3AED",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-light-32x32.png", "sizes": "32x32", "type": "image/png" }
+  ]
+}
