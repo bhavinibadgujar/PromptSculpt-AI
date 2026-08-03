@@ -2,15 +2,16 @@
 
 import { MoonStar, SunMedium } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
 
   if (!mounted) {
     return <div className="size-11" aria-hidden="true" />
@@ -28,7 +29,11 @@ export function ThemeToggle() {
       aria-pressed={isDark}
     >
       <span className="relative block h-5 w-5 transition-transform duration-300 group-hover:scale-110">
-        {isDark ? <SunMedium className="h-5 w-5 text-amber-500" /> : <MoonStar className="h-5 w-5 text-violet-600" />}
+        {isDark ? (
+          <SunMedium className="h-5 w-5 text-amber-500" />
+        ) : (
+          <MoonStar className="h-5 w-5 text-violet-600" />
+        )}
       </span>
     </button>
   )
